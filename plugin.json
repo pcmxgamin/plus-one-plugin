@@ -1,9 +1,15 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "plus-one-daily",
-  "version": "0.2.0",
+  "version": "0.5.0",
   "description": "One useful personalised thing to learn every day inside ChatGPT.",
-  "keywords": ["learning", "daily", "personalisation", "skills", "microlearning"],
+  "keywords": [
+    "learning",
+    "daily",
+    "personalisation",
+    "skills",
+    "microlearning"
+  ],
   "extensions": {
     "com.openai": {
       "interface": {
@@ -12,7 +18,10 @@
         "longDescription": "+1 chooses one genuinely useful thing worth learning next, teaches it in a short interactive ChatGPT lesson, and records what you can now do, understand, or recognise.",
         "developerName": "+1",
         "category": "Education",
-        "capabilities": ["Read", "Write"],
+        "capabilities": [
+          "Read",
+          "Write"
+        ],
         "defaultPrompt": [
           "Give me today's +1.",
           "Teach me one useful thing in five minutes.",
