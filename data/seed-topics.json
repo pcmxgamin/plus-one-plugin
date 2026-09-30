@@ -1,27 +1,395 @@
 [
-  {"id":"ai-email-thread","title":"Turn a long email thread into decisions and next actions","tags":["ai","productivity","communication"],"minutes":4,"outcome":"turn a messy email thread into a concise decision-and-action summary","why":"Saves time and prevents missed actions."},
-  {"id":"phishing-signals","title":"Spot three common warning signs of a phishing message","tags":["technology","safety","life"],"minutes":4,"outcome":"identify three common phishing warning signs before clicking","why":"Reduces everyday digital risk."},
-  {"id":"dynamic-currency","title":"Avoid dynamic currency conversion when travelling","tags":["money","travel","life"],"minutes":3,"outcome":"recognise dynamic currency conversion and choose the safer payment option","why":"Can prevent unnecessary card conversion costs."},
-  {"id":"mental-percent","title":"Estimate percentages quickly in your head","tags":["money","maths","life"],"minutes":4,"outcome":"estimate common percentages mentally using simple decompositions","why":"Useful for discounts, tips, interest and everyday comparisons."},
-  {"id":"youtube-ctr-retention","title":"Understand YouTube CTR versus audience retention","tags":["youtube","content","business"],"minutes":5,"outcome":"explain the difference between click-through rate and audience retention and what each tells a creator","why":"Helps diagnose why a video is or is not performing."},
-  {"id":"phone-video-basics","title":"Film a cleaner-looking video using only your phone","tags":["video","content","technology"],"minutes":5,"outcome":"set up framing, light and audio for a simple phone video","why":"Improves video quality without buying equipment."},
-  {"id":"fake-reviews","title":"Recognise signals that an online review may be unreliable","tags":["shopping","technology","life"],"minutes":4,"outcome":"identify several signals that make an online review less trustworthy","why":"Helps make better purchasing decisions."},
-  {"id":"router-basics","title":"Understand what your Wi-Fi router actually does","tags":["technology","home"],"minutes":4,"outcome":"explain the difference between internet service, modem/router functions and Wi-Fi","why":"Makes home-network problems easier to diagnose."},
-  {"id":"tyre-numbers","title":"Decode the numbers printed on a car tyre","tags":["cars","life","practical"],"minutes":5,"outcome":"interpret the main tyre-size markings on a vehicle tyre","why":"Useful when checking or replacing tyres."},
-  {"id":"aquaplaning","title":"Know the basic response to aquaplaning","tags":["cars","safety","life"],"minutes":4,"outcome":"describe the basic safe response if a car begins aquaplaning","why":"A practical driving-safety skill."},
-  {"id":"thunder-distance","title":"Estimate how far away a thunderstorm is","tags":["science","outdoors","life"],"minutes":3,"outcome":"estimate storm distance from the flash-to-thunder delay","why":"Turns a simple observation into useful weather awareness."},
-  {"id":"qr-scam","title":"Check a QR code before trusting where it sends you","tags":["technology","safety"],"minutes":4,"outcome":"perform basic checks before trusting a QR-code destination","why":"QR-code scams exploit the fact that URLs are hidden until scanning."},
-  {"id":"wall-fixing","title":"Choose a fixing for plasterboard, timber or masonry","tags":["diy","home","practical"],"minutes":5,"outcome":"distinguish common wall types and select an appropriate basic fixing category","why":"Avoids weak or damaging DIY mounting choices."},
-  {"id":"gross-margin","title":"Understand gross margin versus markup","tags":["business","money"],"minutes":4,"outcome":"calculate and explain the difference between markup and gross margin","why":"A common source of pricing mistakes in small business."},
-  {"id":"subscription-annualise","title":"See the real annual cost of a monthly subscription","tags":["money","life"],"minutes":3,"outcome":"convert monthly recurring costs into annual cost and compare alternatives","why":"Makes recurring spending easier to evaluate."},
-  {"id":"name-memory","title":"Remember someone's name after meeting them","tags":["communication","psychology","life"],"minutes":4,"outcome":"use a simple attention-and-retrieval technique to improve name recall","why":"Useful in social and professional settings."},
-  {"id":"scan-documents","title":"Scan a document properly with a phone instead of photographing it","tags":["technology","productivity","life"],"minutes":3,"outcome":"create a clean phone-based document scan","why":"Produces clearer, easier-to-share records."},
-  {"id":"compound-interest","title":"Understand compound growth intuitively","tags":["money","maths","life"],"minutes":5,"outcome":"explain how compounding changes growth over time","why":"Foundational for savings, debt and investing literacy."},
-  {"id":"image-metadata","title":"Understand what metadata can travel with a photo","tags":["technology","privacy","life"],"minutes":4,"outcome":"explain common photo metadata and when to remove location information","why":"Improves everyday privacy awareness."},
-  {"id":"pan-sauce","title":"Make a simple pan sauce from cooking residue","tags":["cooking","practical"],"minutes":5,"outcome":"describe the basic deglaze-reduce-finish method for a simple pan sauce","why":"Turns a basic cooking technique into better flavour with little extra effort."},
-  {"id":"oil-fire","title":"Know why water is dangerous on a cooking-oil fire","tags":["home","safety","life"],"minutes":4,"outcome":"explain why water should not be used on a cooking-oil fire and name safer immediate responses","why":"Important household safety knowledge."},
-  {"id":"aed-basics","title":"Understand what an AED is designed to do","tags":["safety","life"],"minutes":4,"outcome":"explain the purpose of an AED and the basic role of its voice-guided prompts","why":"Makes emergency equipment less intimidating."},
-  {"id":"gps-basics","title":"Understand how GPS can locate your phone","tags":["technology","science"],"minutes":5,"outcome":"explain at a high level how timing signals from satellites are used to estimate position","why":"Turns an everyday technology into an understandable system."},
-  {"id":"password-manager","title":"Understand why password managers improve account security","tags":["technology","safety","life"],"minutes":4,"outcome":"explain why unique generated passwords plus a password manager reduce credential-reuse risk","why":"Practical digital security."},
-  {"id":"ai-hallucination-check","title":"Check an AI answer before trusting an important factual claim","tags":["ai","technology","critical-thinking"],"minutes":5,"outcome":"use a short verification routine for important AI-generated factual claims","why":"Improves safe and effective AI use."}
+  {
+    "id": "ai-email-thread",
+    "title": "Turn a long email thread into decisions and next actions",
+    "tags": [
+      "ai",
+      "productivity",
+      "communication"
+    ],
+    "minutes": 4,
+    "outcome": "turn a messy email thread into a concise decision-and-action summary",
+    "why": "Saves time and prevents missed actions.",
+    "teach": "Use a three-pass prompt: first ask for the decisions already made, then the unresolved questions, then the next actions with an owner and deadline if one is stated. This separates facts from interpretation and makes long threads operational.",
+    "check_question": "If an email thread contains discussion, one firm decision and two unanswered questions, what should your summary separate?",
+    "check_answer": "Separate the confirmed decision, the unresolved questions, and the next actions. Do not blend guesses into the confirmed decision.",
+    "achievement": "turn a long email thread into decisions, unresolved questions and next actions"
+  },
+  {
+    "id": "phishing-signals",
+    "title": "Spot three common warning signs of a phishing message",
+    "tags": [
+      "technology",
+      "safety",
+      "life"
+    ],
+    "minutes": 4,
+    "outcome": "identify three common phishing warning signs before clicking",
+    "why": "Reduces everyday digital risk.",
+    "teach": "Check three things before acting: the sender identity, the destination behind links, and the pressure tactic. Unexpected urgency, mismatched domains, requests for credentials or payment, and unusual attachments are common warning signs. When unsure, open the real service separately instead of using the message link.",
+    "check_question": "A message says your account will be closed in 10 minutes and asks you to sign in through a shortened link. Name two warning signs.",
+    "check_answer": "The manufactured urgency and the obscured/shortened destination are both warning signs. A safer move is to open the service independently.",
+    "achievement": "identify common phishing signals and choose a safer verification step"
+  },
+  {
+    "id": "dynamic-currency",
+    "title": "Avoid dynamic currency conversion when travelling",
+    "tags": [
+      "money",
+      "travel",
+      "life"
+    ],
+    "minutes": 3,
+    "outcome": "recognise dynamic currency conversion and choose the safer payment option",
+    "why": "Can prevent unnecessary card conversion costs.",
+    "teach": "When a card terminal overseas offers to charge you in your home currency, that is dynamic currency conversion. The merchant-side conversion can include an unfavourable exchange rate or markup. In many cases, choosing the local currency lets your card issuer handle conversion instead.",
+    "check_question": "You are in Japan and a terminal offers AUD or JPY. Which choice usually avoids dynamic currency conversion?",
+    "check_answer": "JPY, the local currency. Your card issuer can then perform the currency conversion under your card's terms.",
+    "achievement": "recognise dynamic currency conversion and choose the local-currency option"
+  },
+  {
+    "id": "mental-percent",
+    "title": "Estimate percentages quickly in your head",
+    "tags": [
+      "money",
+      "maths",
+      "life"
+    ],
+    "minutes": 4,
+    "outcome": "estimate common percentages mentally using simple decompositions",
+    "why": "Useful for discounts, tips, interest and everyday comparisons.",
+    "teach": "Break percentages into easy pieces. Ten percent means divide by 10. Five percent is half of 10%. One percent is divide by 100. Then combine them: 15% = 10% + 5%; 12% = 10% + 2%.",
+    "check_question": "Estimate 15% of 80 without a calculator.",
+    "check_answer": "10% of 80 is 8 and 5% is 4, so 15% is 12.",
+    "achievement": "estimate common percentages mentally using simple decompositions"
+  },
+  {
+    "id": "youtube-ctr-retention",
+    "title": "Understand YouTube CTR versus audience retention",
+    "tags": [
+      "youtube",
+      "content",
+      "business"
+    ],
+    "minutes": 5,
+    "outcome": "explain the difference between click-through rate and audience retention and what each tells a creator",
+    "why": "Helps diagnose why a video is or is not performing.",
+    "teach": "CTR asks: of the people who were shown your thumbnail/title, how many clicked? Retention asks: once they clicked, how long did they keep watching? Low CTR often points to packaging. Good CTR but weak retention often points to the opening, pacing, or mismatch between promise and delivery.",
+    "check_question": "A video has strong CTR but viewers leave in the first 30 seconds. Which metric is the clearer problem signal?",
+    "check_answer": "Audience retention. People are clicking, but the video is not holding them after the click.",
+    "achievement": "distinguish YouTube CTR from audience retention and diagnose what each metric suggests"
+  },
+  {
+    "id": "phone-video-basics",
+    "title": "Film a cleaner-looking video using only your phone",
+    "tags": [
+      "video",
+      "content",
+      "technology"
+    ],
+    "minutes": 5,
+    "outcome": "set up framing, light and audio for a simple phone video",
+    "why": "Improves video quality without buying equipment.",
+    "teach": "Three upgrades matter more than fancy gear: face a soft light source, keep the phone stable at roughly eye level, and get the microphone close to the speaker. Good audio and controlled light usually improve perceived quality more than higher resolution.",
+    "check_question": "You can improve only one thing: move the phone closer for clearer audio or switch from 1080p to 4K. Which usually helps more?",
+    "check_answer": "Move the phone closer for clearer audio. Viewers tolerate average video more readily than hard-to-hear speech.",
+    "achievement": "set up cleaner phone video using better light, stability and audio"
+  },
+  {
+    "id": "fake-reviews",
+    "title": "Recognise signals that an online review may be unreliable",
+    "tags": [
+      "shopping",
+      "technology",
+      "life"
+    ],
+    "minutes": 4,
+    "outcome": "identify several signals that make an online review less trustworthy",
+    "why": "Helps make better purchasing decisions.",
+    "teach": "Treat reviews as evidence, not truth. Look for clusters of near-identical wording, sudden bursts of reviews, vague praise with no product detail, and a mismatch between rating and specific comments. The strongest signal is a pattern across many reviews, not one suspicious sentence.",
+    "check_question": "Why is one overly enthusiastic review not enough to prove reviews are fake?",
+    "check_answer": "Because individual reviews can genuinely be enthusiastic; you need a broader pattern such as repeated wording, timing bursts or inconsistent detail.",
+    "achievement": "spot patterns that can make online reviews less trustworthy"
+  },
+  {
+    "id": "router-basics",
+    "title": "Understand what your Wi-Fi router actually does",
+    "tags": [
+      "technology",
+      "home"
+    ],
+    "minutes": 4,
+    "outcome": "explain the difference between internet service, modem/router functions and Wi-Fi",
+    "why": "Makes home-network problems easier to diagnose.",
+    "teach": "Your internet connection and Wi‑Fi are different layers. The ISP connection brings internet service to your home. A router directs traffic between devices and the internet. Wi‑Fi is simply the local wireless link between your device and the router. So strong Wi‑Fi does not guarantee the internet service itself is working.",
+    "check_question": "Your phone shows full Wi‑Fi bars but websites do not load. What does that tell you?",
+    "check_answer": "The phone has a strong local wireless connection to the router, but the router or upstream internet connection may still be failing.",
+    "achievement": "separate Wi‑Fi signal, router function and internet service when troubleshooting"
+  },
+  {
+    "id": "tyre-numbers",
+    "title": "Decode the numbers printed on a car tyre",
+    "tags": [
+      "cars",
+      "life",
+      "practical"
+    ],
+    "minutes": 5,
+    "outcome": "interpret the main tyre-size markings on a vehicle tyre",
+    "why": "Useful when checking or replacing tyres.",
+    "teach": "In a marking like 225/45 R17, 225 is tyre width in millimetres, 45 is sidewall height as a percentage of that width, R means radial construction, and 17 is wheel diameter in inches. Load and speed ratings usually follow.",
+    "check_question": "In 205/55 R16, what does 55 represent?",
+    "check_answer": "The sidewall height is 55% of the tyre's 205 mm width.",
+    "achievement": "decode the main size markings printed on a car tyre"
+  },
+  {
+    "id": "aquaplaning",
+    "title": "Know the basic response to aquaplaning",
+    "tags": [
+      "cars",
+      "safety",
+      "life"
+    ],
+    "minutes": 4,
+    "outcome": "describe the basic safe response if a car begins aquaplaning",
+    "why": "A practical driving-safety skill.",
+    "teach": "Aquaplaning happens when water builds between the tyres and road, reducing grip. The basic response is to stay calm, ease off the accelerator, keep steering smooth, and avoid sudden braking or sharp steering. Grip usually returns as speed drops and the tyres reconnect with the road.",
+    "check_question": "During suspected aquaplaning, why are abrupt steering and heavy braking poor choices?",
+    "check_answer": "Because the tyres have reduced grip, sudden inputs can make the vehicle less stable. Smooth inputs while reducing speed are safer.",
+    "achievement": "describe the basic calm response to suspected aquaplaning"
+  },
+  {
+    "id": "thunder-distance",
+    "title": "Estimate how far away a thunderstorm is",
+    "tags": [
+      "science",
+      "outdoors",
+      "life"
+    ],
+    "minutes": 3,
+    "outcome": "estimate storm distance from the flash-to-thunder delay",
+    "why": "Turns a simple observation into useful weather awareness.",
+    "teach": "Light reaches you almost instantly, while sound travels much more slowly. A practical estimate is to count seconds between the flash and thunder, then divide by about 3 to estimate kilometres. It is only a rough distance estimate, not a guarantee of safety.",
+    "check_question": "You count 9 seconds between lightning and thunder. Roughly how far away is the storm activity?",
+    "check_answer": "About 3 km away using the rough seconds-divided-by-3 rule.",
+    "achievement": "estimate storm distance from the flash-to-thunder delay"
+  },
+  {
+    "id": "qr-scam",
+    "title": "Check a QR code before trusting where it sends you",
+    "tags": [
+      "technology",
+      "safety"
+    ],
+    "minutes": 4,
+    "outcome": "perform basic checks before trusting a QR-code destination",
+    "why": "QR-code scams exploit the fact that URLs are hidden until scanning.",
+    "teach": "A QR code hides its destination until you scan it, so treat it like an unknown link. Preview the domain before opening, be suspicious of stickers placed over legitimate codes, and avoid entering credentials if the destination looks unusual. For important services, open the official app or site directly.",
+    "check_question": "A QR sticker is placed over the printed code on a parking meter. What is the safer next step?",
+    "check_answer": "Do not trust the overlaid sticker automatically. Use the official parking app/site or verify the destination independently.",
+    "achievement": "check a QR-code destination before trusting it"
+  },
+  {
+    "id": "wall-fixing",
+    "title": "Choose a fixing for plasterboard, timber or masonry",
+    "tags": [
+      "diy",
+      "home",
+      "practical"
+    ],
+    "minutes": 5,
+    "outcome": "distinguish common wall types and select an appropriate basic fixing category",
+    "why": "Avoids weak or damaging DIY mounting choices.",
+    "teach": "The wall material determines the fixing. Timber studs can take screws directly. Plasterboard often needs a hollow-wall anchor unless you hit a stud. Masonry usually needs a suitable masonry plug/anchor and drilled hole. Load matters too: heavier items need stronger fixings and better substrate.",
+    "check_question": "You want to mount a moderately heavy shelf on plasterboard. What should you check before choosing the fixing?",
+    "check_answer": "Check whether you can anchor into a stud; otherwise choose a hollow-wall fixing rated for the load and wall type.",
+    "achievement": "match basic wall types to appropriate fixing categories"
+  },
+  {
+    "id": "gross-margin",
+    "title": "Understand gross margin versus markup",
+    "tags": [
+      "business",
+      "money"
+    ],
+    "minutes": 4,
+    "outcome": "calculate and explain the difference between markup and gross margin",
+    "why": "A common source of pricing mistakes in small business.",
+    "teach": "Markup and gross margin use different denominators. Markup = profit ÷ cost. Gross margin = profit ÷ selling price. If something costs $60 and sells for $100, profit is $40: markup is 40/60 = 66.7%, while gross margin is 40/100 = 40%.",
+    "check_question": "An item costs $75 and sells for $100. What is the gross margin?",
+    "check_answer": "Profit is $25, so gross margin is $25 ÷ $100 = 25%.",
+    "achievement": "calculate and explain the difference between markup and gross margin"
+  },
+  {
+    "id": "subscription-annualise",
+    "title": "See the real annual cost of a monthly subscription",
+    "tags": [
+      "money",
+      "life"
+    ],
+    "minutes": 3,
+    "outcome": "convert monthly recurring costs into annual cost and compare alternatives",
+    "why": "Makes recurring spending easier to evaluate.",
+    "teach": "Monthly prices feel smaller because the time window is short. Convert them to a common period before comparing. Multiply a monthly subscription by 12, then add any annual extras. This also makes small recurring costs easier to notice.",
+    "check_question": "A service costs $19 per month. What is the simple annual cost before any discounts or fees?",
+    "check_answer": "$228 per year.",
+    "achievement": "convert monthly recurring costs into annual cost before comparing options"
+  },
+  {
+    "id": "name-memory",
+    "title": "Remember someone's name after meeting them",
+    "tags": [
+      "communication",
+      "psychology",
+      "life"
+    ],
+    "minutes": 4,
+    "outcome": "use a simple attention-and-retrieval technique to improve name recall",
+    "why": "Useful in social and professional settings.",
+    "teach": "Name memory improves when you deliberately encode and retrieve it. On introduction, repeat the name naturally once, connect it to one distinctive non-sensitive detail, then try recalling the name a minute later without looking. Retrieval is more powerful than simply hearing it again.",
+    "check_question": "Which helps memory more: silently hearing a name three times, or trying to recall it after a short delay?",
+    "check_answer": "Trying to recall it after a short delay. Retrieval strengthens memory more than passive repetition.",
+    "achievement": "use deliberate encoding and retrieval to improve name recall"
+  },
+  {
+    "id": "scan-documents",
+    "title": "Scan a document properly with a phone instead of photographing it",
+    "tags": [
+      "technology",
+      "productivity",
+      "life"
+    ],
+    "minutes": 3,
+    "outcome": "create a clean phone-based document scan",
+    "why": "Produces clearer, easier-to-share records.",
+    "teach": "A document scanner app does more than take a photo: it detects page edges, corrects perspective, improves contrast and can combine pages into one PDF. Place the document flat, use even light, avoid shadows, and check that small text is sharp before saving.",
+    "check_question": "Why is a scan usually better than a normal angled phone photo of a document?",
+    "check_answer": "It can correct perspective, crop the page cleanly, improve contrast and package multiple pages consistently.",
+    "achievement": "create a cleaner phone-based document scan instead of a casual photo"
+  },
+  {
+    "id": "compound-interest",
+    "title": "Understand compound growth intuitively",
+    "tags": [
+      "money",
+      "maths",
+      "life"
+    ],
+    "minutes": 5,
+    "outcome": "explain how compounding changes growth over time",
+    "why": "Foundational for savings, debt and investing literacy.",
+    "teach": "With compounding, growth is applied to the original amount plus earlier growth. That means the base itself gets larger over time. The key intuition is not 'the rate gets bigger'—the rate can stay constant while the amount it acts on grows.",
+    "check_question": "If the interest rate stays fixed, why can the dollar amount of interest increase each year?",
+    "check_answer": "Because the rate is applied to a growing balance that includes earlier interest.",
+    "achievement": "explain why compound growth accelerates even when the percentage rate stays constant"
+  },
+  {
+    "id": "image-metadata",
+    "title": "Understand what metadata can travel with a photo",
+    "tags": [
+      "technology",
+      "privacy",
+      "life"
+    ],
+    "minutes": 4,
+    "outcome": "explain common photo metadata and when to remove location information",
+    "why": "Improves everyday privacy awareness.",
+    "teach": "Photos can contain metadata such as capture time, camera information and sometimes location coordinates. Social platforms may strip some metadata, but you should not rely on that universally. Before sharing sensitive-location photos, use your phone's location-sharing controls or remove location metadata.",
+    "check_question": "Why might sharing the original photo file reveal more than sharing a screenshot of it?",
+    "check_answer": "The original can retain metadata such as capture details or location, while a screenshot usually creates a new file with different metadata.",
+    "achievement": "explain photo metadata and reduce accidental location sharing"
+  },
+  {
+    "id": "pan-sauce",
+    "title": "Make a simple pan sauce from cooking residue",
+    "tags": [
+      "cooking",
+      "practical"
+    ],
+    "minutes": 5,
+    "outcome": "describe the basic deglaze-reduce-finish method for a simple pan sauce",
+    "why": "Turns a basic cooking technique into better flavour with little extra effort.",
+    "teach": "A basic pan sauce follows four steps: remove the cooked food, add a small amount of liquid to loosen browned bits, simmer to reduce and concentrate flavour, then finish with a little butter or another fat for body. Use sensible heat and avoid deglazing a dangerously overheated pan.",
+    "check_question": "What is the purpose of deglazing the pan?",
+    "check_answer": "To dissolve and lift the browned flavourful bits into the liquid so they become part of the sauce.",
+    "achievement": "describe the deglaze-reduce-finish method for a simple pan sauce"
+  },
+  {
+    "id": "oil-fire",
+    "title": "Know why water is dangerous on a cooking-oil fire",
+    "tags": [
+      "home",
+      "safety",
+      "life"
+    ],
+    "minutes": 4,
+    "outcome": "explain why water should not be used on a cooking-oil fire and name safer immediate responses",
+    "why": "Important household safety knowledge.",
+    "teach": "Water and burning cooking oil are a dangerous combination because water can rapidly turn to steam and throw burning oil outward. If it is safe to do so, turn off the heat, cover a small pan fire with a suitable metal lid or fire blanket, and use an appropriate extinguisher. If the fire is not immediately controlled, leave and call emergency services.",
+    "check_question": "Why should you never pour water onto burning cooking oil?",
+    "check_answer": "Water can flash to steam and violently spread the burning oil, making the fire much worse.",
+    "achievement": "explain why water is dangerous on an oil fire and name safer immediate actions"
+  },
+  {
+    "id": "aed-basics",
+    "title": "Understand what an AED is designed to do",
+    "tags": [
+      "safety",
+      "life"
+    ],
+    "minutes": 4,
+    "outcome": "explain the purpose of an AED and the basic role of its voice-guided prompts",
+    "why": "Makes emergency equipment less intimidating.",
+    "teach": "An AED is designed to analyse a person's heart rhythm during cardiac arrest and advise or deliver a shock only when appropriate. Modern AEDs give spoken or visual prompts. The key idea is to follow the device instructions and emergency-response guidance rather than trying to diagnose the rhythm yourself.",
+    "check_question": "Does an AED simply shock every unconscious person when you press a button?",
+    "check_answer": "No. It analyses the rhythm and only advises/delivers a shock when the detected rhythm is shockable.",
+    "achievement": "explain what an AED does and why its guided prompts matter"
+  },
+  {
+    "id": "gps-basics",
+    "title": "Understand how GPS can locate your phone",
+    "tags": [
+      "technology",
+      "science"
+    ],
+    "minutes": 5,
+    "outcome": "explain at a high level how timing signals from satellites are used to estimate position",
+    "why": "Turns an everyday technology into an understandable system.",
+    "teach": "GPS satellites broadcast extremely precise timing information. Your receiver compares when signals from several satellites arrive. Because radio signals travel at the speed of light, tiny timing differences translate into distance estimates. Combining distances from multiple satellites allows the receiver to solve for position and clock error.",
+    "check_question": "Why does GPS need signals from multiple satellites rather than just one?",
+    "check_answer": "One satellite gives a distance-like constraint; multiple satellites are needed to solve for a unique position and correct timing error.",
+    "achievement": "explain at a high level how satellite timing signals are used to estimate position"
+  },
+  {
+    "id": "password-manager",
+    "title": "Understand why password managers improve account security",
+    "tags": [
+      "technology",
+      "safety",
+      "life"
+    ],
+    "minutes": 4,
+    "outcome": "explain why unique generated passwords plus a password manager reduce credential-reuse risk",
+    "why": "Practical digital security.",
+    "teach": "Password managers reduce credential reuse by generating and storing a different strong password for each account. Then one breached website does not automatically expose the password used elsewhere. Protect the manager itself with a strong unique master password and, where available, multi-factor authentication.",
+    "check_question": "Why is reusing one very strong password across many sites still risky?",
+    "check_answer": "If any one site leaks or captures that password, attackers can try the same credential on your other accounts.",
+    "achievement": "explain how unique passwords plus a password manager reduce credential-reuse risk"
+  },
+  {
+    "id": "ai-hallucination-check",
+    "title": "Check an AI answer before trusting an important factual claim",
+    "tags": [
+      "ai",
+      "technology",
+      "critical-thinking"
+    ],
+    "minutes": 5,
+    "outcome": "use a short verification routine for important AI-generated factual claims",
+    "why": "Improves safe and effective AI use.",
+    "teach": "Use a short verification routine for important AI claims: identify the exact factual claim, ask for sources or locate primary sources yourself, check the date and context, and confirm the claim from at least one reliable independent source when the stakes justify it. Confidence in wording is not evidence of truth.",
+    "check_question": "An AI answer sounds extremely confident and includes a precise statistic. What should you verify first?",
+    "check_answer": "Verify the exact statistic against a reliable, preferably primary, source and check whether its date/context matches the claim.",
+    "achievement": "verify important AI-generated factual claims instead of trusting confident wording"
+  }
 ]
