@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0d12" />
+  <title>+1 — One useful thing. Every day.</title>
+  <style>
+    :root{--bg:#0b0d12;--card:#141821;--card2:#1a2030;--text:#f7f8fb;--muted:#9ba5b7;--line:#283044;--accent:#d8ff3e;--accent2:#bdf52a;--danger:#ff6b6b;--shadow:0 20px 60px rgba(0,0,0,.32)}
+    *{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at 15% -10%,#26312a 0,transparent 30%),var(--bg);color:var(--text);font:16px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
+    button,input,textarea{font:inherit}.shell{max-width:760px;margin:0 auto;padding:24px 18px 100px}.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:26px}.brand{font-size:28px;font-weight:900;letter-spacing:-.06em}.brand span{color:var(--accent)}.tagline{font-size:12px;color:var(--muted);margin-top:-5px}.pill{border:1px solid var(--line);background:#10141c;color:var(--muted);border-radius:999px;padding:7px 10px;font-size:12px}
+    .card{background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:24px;padding:22px;box-shadow:var(--shadow);margin-bottom:16px}.hero{padding:30px}.eyebrow{color:var(--accent);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.12em}.title{font-size:34px;line-height:1.04;letter-spacing:-.04em;margin:9px 0 12px}.sub{color:var(--muted);font-size:15px}.big{font-size:46px;font-weight:900;letter-spacing:-.07em}
+    .btn{border:0;border-radius:14px;padding:14px 16px;font-weight:800;cursor:pointer;width:100%;margin-top:10px}.btn.primary{background:var(--accent);color:#111}.btn.secondary{background:#202738;color:var(--text);border:1px solid var(--line)}.btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}.btn.danger{background:transparent;color:#ff9d9d;border:1px solid #5a2c2c}.btn:disabled{opacity:.55;cursor:not-allowed}
+    input,textarea{width:100%;background:#0f131b;color:var(--text);border:1px solid var(--line);border-radius:14px;padding:14px;outline:none}input:focus,textarea:focus{border-color:#6e7f2c;box-shadow:0 0 0 3px rgba(216,255,62,.08)}textarea{min-height:88px;resize:vertical}.label{font-size:13px;color:var(--muted);margin:14px 0 7px}.chips{display:flex;gap:8px;flex-wrap:wrap}.chip{border:1px solid var(--line);background:#11161f;color:#cbd2df;border-radius:999px;padding:9px 12px;cursor:pointer;font-size:13px}.chip.on{background:rgba(216,255,62,.12);border-color:#789024;color:var(--accent)}
+    .hidden{display:none!important}.sectionTitle{font-size:20px;font-weight:850;letter-spacing:-.02em;margin:28px 0 10px}.row{display:flex;gap:10px;align-items:center}.row>*{flex:1}.meta{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.meta span{font-size:12px;color:var(--muted);background:#0e131b;border:1px solid var(--line);padding:6px 9px;border-radius:999px}
+    .lessonBlock{border-top:1px solid var(--line);padding-top:18px;margin-top:18px}.lessonBlock h3{margin:0 0 8px;font-size:15px}.lessonBlock p{margin:0;color:#d8deea}.check{background:#10151f;border:1px solid #34405a;border-radius:18px;padding:16px;margin-top:18px}.answer{margin-top:12px;padding:12px;border-radius:12px;background:#0d1118;color:#d9e0ec;border-left:3px solid var(--accent)}
+    .cap{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}.cap:last-child{border-bottom:0}.tick{width:30px;height:30px;flex:0 0 30px;border-radius:50%;display:grid;place-items:center;background:rgba(216,255,62,.12);color:var(--accent);font-weight:900}.capTitle{font-weight:750}.capDate{font-size:12px;color:var(--muted);margin-top:3px}
+    .empty{color:var(--muted);text-align:center;padding:22px 8px}.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#1b2230;border:1px solid var(--line);padding:11px 14px;border-radius:12px;box-shadow:var(--shadow);z-index:20;max-width:90%;text-align:center}.small{font-size:12px;color:var(--muted)}.divider{height:1px;background:var(--line);margin:18px 0}.dangerZone{margin-top:34px;padding-top:18px;border-top:1px solid #3c2929}
+    @media(max-width:520px){.shell{padding:18px 14px 86px}.hero{padding:22px}.title{font-size:30px}.row{display:block}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="top">
+      <div><div class="brand"><span>+</span>1</div><div class="tagline">One useful thing. Every day.</div></div>
+      <button id="signOut" class="pill hidden">Sign out</button>
+    </header>
+
+    <section id="authView" class="card hero">
+      <div class="eyebrow">Private beta</div>
+      <div class="title">Become a little more capable every day.</div>
+      <p class="sub">+1 gives you one useful 3–5 minute lesson, chosen for you. No streak guilt. No backlog. Just today’s +1.</p>
+      <div class="label">Email</div>
+      <input id="email" type="email" autocomplete="email" placeholder="you@example.com" />
+      <button id="sendLink" class="btn primary">Email me a sign-in link</button>
+      <p id="authMsg" class="small"></p>
+    </section>
+
+    <section id="onboardingView" class="hidden">
+      <div class="card hero">
+        <div class="eyebrow">Set up your +1</div>
+        <div class="title">What should make you more capable?</div>
+        <p class="sub">Pick a few interests. +1 will mix these with practical life skills and occasional surprises.</p>
+        <div id="interestChips" class="chips"></div>
+        <div class="label">What would you like to get better at?</div>
+        <textarea id="goals" placeholder="e.g. using AI better, growing a business, practical skills, communication..."></textarea>
+        <div class="label">Anything you’d rather not get?</div>
+        <input id="avoid" placeholder="Optional — e.g. cooking, cars" />
+        <button id="saveOnboarding" class="btn primary">Create my +1</button>
+      </div>
+    </section>
+
+    <section id="appView" class="hidden">
+      <div class="card hero">
+        <div class="row">
+          <div>
+            <div class="eyebrow">Today’s +1</div>
+            <div id="todayDate" class="small"></div>
+          </div>
+          <div style="text-align:right"><span id="minutes" class="pill">3–5 min</span></div>
+        </div>
+        <div id="lessonTitle" class="title">Loading today’s +1…</div>
+        <p id="lessonWhy" class="sub"></p>
+        <div id="lessonMeta" class="meta"></div>
+
+        <div id="lessonContent" class="hidden">
+          <div class="lessonBlock"><h3>Learning intention</h3><p id="lessonOutcome"></p></div>
+          <div class="lessonBlock"><h3>The useful bit</h3><p id="lessonTeach"></p></div>
+          <div class="check">
+            <div class="eyebrow">Quick check</div>
+            <p id="checkQuestion"></p>
+            <textarea id="checkResponse" placeholder="Write your answer in your own words…"></textarea>
+            <button id="revealAnswer" class="btn secondary">Check my thinking</button>
+            <div id="answerBox" class="answer hidden"></div>
+          </div>
+          <button id="completeLesson" class="btn primary hidden">I’ve got it — +1 complete</button>
+          <button id="needHelp" class="btn ghost hidden">I need another explanation</button>
+        </div>
+        <button id="startLesson" class="btn primary">Start today’s +1</button>
+      </div>
+
+      <div class="sectionTitle">Capability Passport</div>
+      <div class="card">
+        <div class="row"><div><div class="big" id="capCount">0</div><div class="small">demonstrated capabilities</div></div><div style="text-align:right" class="small">Proof of what you can do,<br/>not meaningless XP.</div></div>
+        <div class="divider"></div>
+        <div id="capList"></div>
+      </div>
+
+      <div class="sectionTitle">Your learning profile</div>
+      <div class="card">
+        <div id="profileSummary" class="small"></div>
+        <button id="editProfile" class="btn secondary">Edit profile</button>
+        <button id="exportData" class="btn ghost">Export my +1 data</button>
+        <div class="dangerZone">
+          <div class="small">Privacy control</div>
+          <button id="deleteData" class="btn danger">Delete my +1 learning data</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const CONFIG = {
+      supabaseUrl: "https://cztugvujtyzciuvntzvj.supabase.co",
+      supabaseKey: "sb_publishable_mh7_Hk9GZyjJFUFCL-qwGg_ACXBxu7N"
+    };
+    const sb = supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey, {
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+    });
+    const $ = id => document.getElementById(id);
+    const interests = ["AI","business","technology","money","practical life","science","creativity","communication","content creation","travel","maths","DIY"];
+    let selected = new Set();
+    let session = null;
+    let currentLesson = null;
+
+    function toast(msg){$("toast").textContent=msg;$("toast").classList.remove("hidden");setTimeout(()=>$("toast").classList.add("hidden"),2600)}
+    function show(view){["authView","onboardingView","appView"].forEach(id=>$(id).classList.add("hidden"));$(view).classList.remove("hidden");$("signOut").classList.toggle("hidden",view==="authView")}
+    function localDate(){const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-")}
+    async function api(path, options={}){
+      const token=session?.access_token;
+      const res=await fetch(path,{...options,headers:{"Content-Type":"application/json",...(token?{Authorization:"Bearer "+token}:{}),...(options.headers||{})}});
+      if(!res.ok){const t=await res.text();throw new Error(t||("Request failed: "+res.status))}
+      return res.json();
+    }
+    function renderChips(){
+      $("interestChips").innerHTML=interests.map(x=>'<button type="button" class="chip '+(selected.has(x)?"on":"")+'" data-x="'+x+'">'+x+'</button>').join("");
+      document.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{selected.has(b.dataset.x)?selected.delete(b.dataset.x):selected.add(b.dataset.x);renderChips()});
+    }
+    async function getProfile(){
+      return api("/api/profile");
+    }
+    async function routeAfterAuth(){
+      const p=await getProfile();
+      if(!p.exists){show("onboardingView");renderChips();return}
+      selected=new Set(p.interests||[]);$("goals").value=(p.goals||[]).join(", ");$("avoid").value=(p.avoid_topics||[]).join(", ");
+      show("appView");await loadDashboard(p);
+    }
+    async function loadDashboard(p){
+      $("todayDate").textContent=new Date().toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long"});
+      $("profileSummary").textContent="Interests: "+((p.interests||[]).join(", ")||"none yet")+" · Goals: "+((p.goals||[]).join(", ")||"none yet");
+      const [lesson, passport]=await Promise.all([api("/api/today?date="+encodeURIComponent(localDate())),api("/api/passport")]);
+      currentLesson=lesson;
+      $("lessonTitle").textContent=lesson.title;
+      $("lessonWhy").textContent=lesson.why_useful;
+      $("minutes").textContent=lesson.estimated_minutes+" min";
+      $("lessonOutcome").textContent="By the end, you’ll be able to "+lesson.learning_outcome+".";
+      $("lessonTeach").textContent=lesson.teach;
+      $("checkQuestion").textContent=lesson.check_question;
+      $("answerBox").textContent=lesson.check_answer;
+      $("lessonMeta").innerHTML=(lesson.tags||[]).map(t=>"<span>"+t+"</span>").join("");
+      renderPassport(passport);
+    }
+    function renderPassport(p){
+      $("capCount").textContent=p.total_capabilities||0;
+      $("capList").innerHTML=(p.capabilities||[]).length ? p.capabilities.map(c=>'<div class="cap"><div class="tick">✓</div><div><div class="capTitle">'+escapeHtml(c.capability)+'</div><div class="capDate">'+new Date(c.completedAt).toLocaleDateString()+" · "+(c.tags||[]).join(" · ")+"</div></div></div>").join("") : '<div class="empty">Complete your first +1 and it will appear here.</div>';
+    }
+    function escapeHtml(s){return String(s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+
+    $("sendLink").onclick=async()=>{
+      const email=$("email").value.trim();if(!email)return toast("Enter your email first.");
+      $("sendLink").disabled=true;$("authMsg").textContent="Sending…";
+      const {error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:location.origin,shouldCreateUser:true}});
+      $("sendLink").disabled=false;
+      if(error){$("authMsg").textContent=error.message;return}
+      $("authMsg").textContent="Check your email and tap the secure sign-in link.";
+    };
+    $("saveOnboarding").onclick=async()=>{
+      const goals=$("goals").value.split(",").map(x=>x.trim()).filter(Boolean);
+      const avoid=$("avoid").value.split(",").map(x=>x.trim()).filter(Boolean);
+      await api("/api/profile",{method:"PUT",body:JSON.stringify({interests:[...selected],goals,avoid_topics:avoid})});
+      toast("Your +1 profile is ready.");const p=await getProfile();show("appView");await loadDashboard(p);
+    };
+    $("startLesson").onclick=()=>{$("startLesson").classList.add("hidden");$("lessonContent").classList.remove("hidden")};
+    $("revealAnswer").onclick=()=>{$("answerBox").classList.remove("hidden");$("completeLesson").classList.remove("hidden");$("needHelp").classList.remove("hidden")};
+    $("needHelp").onclick=()=>{toast("Read the model answer, then explain it back in one sentence — retrieval makes it stick.")};
+    $("completeLesson").onclick=async()=>{
+      if(!currentLesson)return;
+      await api("/api/record",{method:"POST",body:JSON.stringify({lesson_id:currentLesson.lesson_id,status:"completed",demonstrated_capability:currentLesson.achievement,tags:currentLesson.tags,rating:"useful"})});
+      toast("+1 complete — capability recorded.");
+      $("completeLesson").disabled=true;$("completeLesson").textContent="✓ +1 complete";
+      renderPassport(await api("/api/passport"));
+    };
+    $("editProfile").onclick=()=>{show("onboardingView");renderChips()};
+    $("exportData").onclick=async()=>{
+      const data=await api("/api/export");
+      const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="plus-one-data.json";a.click();URL.revokeObjectURL(url);
+    };
+    $("deleteData").onclick=async()=>{
+      if(!confirm("Delete your +1 learning profile, lesson history and Capability Passport? This cannot be undone."))return;
+      await api("/api/data",{method:"DELETE"});toast("Your +1 learning data was deleted.");show("onboardingView");selected=new Set();renderChips();
+    };
+    $("signOut").onclick=async()=>{await sb.auth.signOut();session=null;show("authView")};
+
+    sb.auth.onAuthStateChange(async(_event,newSession)=>{session=newSession;if(session){try{await routeAfterAuth()}catch(e){toast(e.message)}}else show("authView")});
+    (async()=>{const {data}=await sb.auth.getSession();session=data.session;if(session){try{await routeAfterAuth()}catch(e){toast(e.message)}}else show("authView")})();
+  </script>
+</body>
+</html>
