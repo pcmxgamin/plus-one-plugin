@@ -3,7 +3,7 @@
   "mcpServers": {
     "plus-one": {
       "type": "streamable-http",
-      "url": "https://YOUR-RENDER-DOMAIN/mcp"
+      "url": "https://plus-one-daily-mcp.onrender.com/mcp"
     }
   }
 }
