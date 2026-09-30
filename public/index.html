@@ -27,13 +27,39 @@
     </header>
 
     <section id="authView" class="card hero">
-      <div class="eyebrow">Private beta</div>
-      <div class="title">Become a little more capable every day.</div>
-      <p class="sub">+1 gives you one useful 3–5 minute lesson, chosen for you. No streak guilt. No backlog. Just today’s +1.</p>
+      <div class="eyebrow">ChatGPT-first learning</div>
+      <div class="title">Your ChatGPT context should decide what you learn next.</div>
+      <p class="sub">+1 is designed to use relevant context from your ChatGPT conversations and memory—when you choose to use +1 in ChatGPT—to find one genuinely useful thing worth learning today.</p>
+      <button id="chatgptConnect" class="btn primary">Continue with ChatGPT</button>
+      <button id="webBeta" class="btn ghost">Use the private web beta instead</button>
+      <p class="small">+1 never needs a copy of your full chat history. ChatGPT can pass only the relevant context needed for the lesson.</p>
+    </section>
+
+    <section id="chatgptView" class="card hero hidden">
+      <div class="eyebrow">Connect +1 to ChatGPT</div>
+      <div class="title">One account. Better context. Better +1s.</div>
+      <p class="sub">When +1 runs inside ChatGPT, ChatGPT can use relevant conversation context and memory to personalise the lesson. Your full conversation archive is not downloaded into +1.</p>
+      <div class="check">
+        <div class="eyebrow">How it works</div>
+        <p><strong>1.</strong> You connect +1 in ChatGPT.</p>
+        <p><strong>2.</strong> You choose whether relevant ChatGPT context can be used for personalisation.</p>
+        <p><strong>3.</strong> ChatGPT passes a compact relevant summary to +1—not your raw history.</p>
+        <p><strong>4.</strong> +1 picks today’s useful lesson and records only your learning profile and Capability Passport.</p>
+      </div>
+      <div class="checkTag">ChatGPT connection is awaiting OpenAI plugin enablement for this private beta.</div>
+      <button id="betaFromChatgpt" class="btn secondary">Continue with private beta for now</button>
+      <button id="backHome" class="btn ghost">Back</button>
+    </section>
+
+    <section id="emailBetaView" class="card hero hidden">
+      <div class="eyebrow">Private web beta</div>
+      <div class="title">Test +1 before the ChatGPT connection is enabled.</div>
+      <p class="sub">Email is only being used to identify your private-beta profile. It is not the final +1 onboarding experience.</p>
       <div class="label">Email</div>
       <input id="email" type="email" autocomplete="email" placeholder="you@example.com" />
-      <button id="sendLink" class="btn primary">Email me a sign-in link</button>
+      <button id="sendLink" class="btn primary">Email me a beta sign-in link</button>
       <p id="authMsg" class="small"></p>
+      <button id="backFromEmail" class="btn ghost">Back</button>
     </section>
 
     <section id="checkInboxView" class="card hero hidden">
@@ -166,7 +192,7 @@
     }
 
     function toast(msg){$("toast").textContent=msg;$("toast").classList.remove("hidden");setTimeout(()=>$("toast").classList.add("hidden"),2600)}
-    function show(view){["authView","checkInboxView","onboardingView","appView"].forEach(id=>$(id).classList.add("hidden"));$(view).classList.remove("hidden");$("signOut").classList.toggle("hidden",view==="authView"||view==="checkInboxView")}
+    function show(view){["authView","chatgptView","emailBetaView","checkInboxView","onboardingView","appView"].forEach(id=>$(id).classList.add("hidden"));$(view).classList.remove("hidden");$("signOut").classList.toggle("hidden",["authView","chatgptView","emailBetaView","checkInboxView"].includes(view))}
     function localDate(){const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-")}
     async function api(path, options={}){
       const token=session?.access_token;
@@ -207,6 +233,12 @@
       $("capList").innerHTML=(p.capabilities||[]).length ? p.capabilities.map(c=>'<div class="cap"><div class="tick">✓</div><div><div class="capTitle">'+escapeHtml(c.capability)+'</div><div class="capDate">'+new Date(c.completedAt).toLocaleDateString()+" · "+(c.tags||[]).join(" · ")+"</div></div></div>").join("") : '<div class="empty">Complete your first +1 and it will appear here.</div>';
     }
     function escapeHtml(s){return String(s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+
+    $("chatgptConnect").onclick=()=>show("chatgptView");
+    $("webBeta").onclick=()=>show("emailBetaView");
+    $("betaFromChatgpt").onclick=()=>show("emailBetaView");
+    $("backHome").onclick=()=>show("authView");
+    $("backFromEmail").onclick=()=>show("authView");
 
     $("sendLink").onclick=async()=>{
       const email=$("email").value.trim();if(!email)return toast("Enter your email first.");
