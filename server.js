@@ -6,6 +6,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { z } from "zod";
 import pg from "pg";
+import { createClient } from "@supabase/supabase-js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const seedTopics = JSON.parse(readFileSync(resolve(__dirname, "data/seed-topics.json"), "utf8"));
@@ -18,6 +19,58 @@ const pool = DATABASE_URL ? new Pool({
   ssl: process.env.PGSSLMODE === "disable" ? false : { rejectUnauthorized: false }
 }) : null;
 let dbReady = null;
+const SUPABASE_URL = process.env.SUPABASE_URL || "";
+const SUPABASE_PUBLISHABLE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY || "";
+
+function supabaseFor(authHeader = "") {
+  if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY || !authHeader?.startsWith("Bearer ")) return null;
+  return createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+    global: { headers: { Authorization: authHeader } },
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
+  });
+}
+
+async function authenticatedContext(authHeader = "") {
+  const client = supabaseFor(authHeader);
+  if (!client) return null;
+  const token = authHeader.replace(/^Bearer\s+/i, "");
+  const { data, error } = await client.auth.getUser(token);
+  if (error || !data?.user) return null;
+  return { client, user: data.user };
+}
+
+async function getRemoteProfile(ctx) {
+  const { data, error } = await ctx.client
+    .from("plus_one_profiles")
+    .select("*")
+    .eq("user_id", ctx.user.id)
+    .maybeSingle();
+  if (error) throw error;
+  return {
+    id: ctx.user.id,
+    interests: data?.interests || [],
+    goals: data?.goals || [],
+    avoidTopics: data?.avoid_topics || [],
+    completedTopicIds: data?.completed_topic_ids || [],
+    recentTopicIds: data?.recent_topic_ids || [],
+    capabilities: [],
+    feedback: [],
+    updatedAt: data?.updated_at || new Date().toISOString()
+  };
+}
+
+async function upsertRemoteProfile(ctx, p) {
+  const { error } = await ctx.client.from("plus_one_profiles").upsert({
+    user_id: ctx.user.id,
+    interests: p.interests,
+    goals: p.goals,
+    avoid_topics: p.avoidTopics,
+    completed_topic_ids: p.completedTopicIds,
+    recent_topic_ids: p.recentTopicIds,
+    updated_at: new Date().toISOString()
+  });
+  if (error) throw error;
+}
 
 async function ensureDatabase() {
   if (!pool) return;
@@ -124,7 +177,7 @@ function makeLessonId(day, topicId) {
   return `${day}:${topicId}`;
 }
 
-function createPlusOneServer() {
+function createPlusOneServer(authHeader = "") {
   const server = new McpServer(
     { name: "plus-one-daily", version: "0.2.0" },
     { instructions: "Choose one useful lesson at a time. Keep raw private conversation text out of plugin storage; use only concise user-approved learning-profile summaries." }
@@ -150,6 +203,16 @@ function createPlusOneServer() {
       annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false }
     },
     async ({ profile_id, interests, goals, avoid_topics }) => {
+      const auth = await authenticatedContext(authHeader);
+      if (auth) {
+        const p = await getRemoteProfile(auth);
+        if (interests) p.interests = [...new Set(interests.map(x => x.trim()).filter(Boolean))];
+        if (goals) p.goals = [...new Set(goals.map(x => x.trim()).filter(Boolean))];
+        if (avoid_topics) p.avoidTopics = [...new Set(avoid_topics.map(x => x.trim()).filter(Boolean))];
+        await upsertRemoteProfile(auth, p);
+        const out = { profile_id: auth.user.id, interests: p.interests, goals: p.goals, avoid_topics: p.avoidTopics };
+        return { structuredContent: out, content: [{ type: "text", text: "Updated the +1 learning profile." }] };
+      }
       const state = await loadState();
       const id = profile_id || DEFAULT_PROFILE_ID;
       const p = profileFor(state, id);
@@ -186,12 +249,23 @@ function createPlusOneServer() {
       annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false }
     },
     async ({ profile_id, context_summary = "", preferred_minutes, local_date }) => {
-      const state = await loadState();
-      const id = profile_id || DEFAULT_PROFILE_ID;
-      const p = profileFor(state, id);
+      const auth = await authenticatedContext(authHeader);
       const day = local_date || new Date().toISOString().slice(0,10);
-      state.lessons[id] ||= {};
-      const existingTopicId = state.lessons[id][day]?.topicId;
+      let id, p, existingTopicId = null, state = null;
+      if (auth) {
+        id = auth.user.id;
+        p = await getRemoteProfile(auth);
+        const { data, error } = await auth.client.from("plus_one_daily_lessons")
+          .select("topic_id").eq("user_id", id).eq("local_date", day).maybeSingle();
+        if (error) throw error;
+        existingTopicId = data?.topic_id || null;
+      } else {
+        state = await loadState();
+        id = profile_id || DEFAULT_PROFILE_ID;
+        p = profileFor(state, id);
+        state.lessons[id] ||= {};
+        existingTopicId = state.lessons[id][day]?.topicId;
+      }
       let topic = existingTopicId ? seedTopics.find(t => t.id === existingTopicId) : null;
       if (!topic) topic = chooseTopic(p, context_summary, `${id}:${day}`);
       if (!existingTopicId && preferred_minutes) {
@@ -202,8 +276,15 @@ function createPlusOneServer() {
           topic = ranked[hashString(stableKey) % Math.min(4, ranked.length)].topic;
         }
       }
-      state.lessons[id][day] = { topicId: topic.id, selectedAt: new Date().toISOString() };
-      await saveState(state);
+      if (auth) {
+        const { error } = await auth.client.from("plus_one_daily_lessons").upsert({
+          user_id: id, local_date: day, topic_id: topic.id, selected_at: new Date().toISOString()
+        });
+        if (error) throw error;
+      } else {
+        state.lessons[id][day] = { topicId: topic.id, selectedAt: new Date().toISOString() };
+        await saveState(state);
+      }
       const out = {
         lesson_id: makeLessonId(day, topic.id),
         title: topic.title,
@@ -240,10 +321,33 @@ function createPlusOneServer() {
       annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false }
     },
     async ({ profile_id, lesson_id, status, demonstrated_capability, rating, tags = [] }) => {
+      const auth = await authenticatedContext(authHeader);
+      const topicId = lesson_id.includes(":") ? lesson_id.split(":").slice(1).join(":") : lesson_id;
+      if (auth) {
+        const p = await getRemoteProfile(auth);
+        p.recentTopicIds = [topicId, ...p.recentTopicIds.filter(x => x !== topicId)].slice(0, 14);
+        if (["completed", "already_knew"].includes(status) && !p.completedTopicIds.includes(topicId)) p.completedTopicIds.push(topicId);
+        await upsertRemoteProfile(auth, p);
+        if (status === "completed" && demonstrated_capability) {
+          const { error } = await auth.client.from("plus_one_capabilities").insert({
+            user_id: auth.user.id, lesson_id, capability: demonstrated_capability, tags
+          });
+          if (error) throw error;
+        }
+        const { error: feedbackError } = await auth.client.from("plus_one_feedback").insert({
+          user_id: auth.user.id, lesson_id, status, rating: rating || null, tags
+        });
+        if (feedbackError) throw feedbackError;
+        const { count, error: countError } = await auth.client.from("plus_one_capabilities")
+          .select("*", { count: "exact", head: true }).eq("user_id", auth.user.id);
+        if (countError) throw countError;
+        const message = status === "completed" ? `Capability recorded: ${demonstrated_capability || "lesson completed"}` : `Recorded lesson as ${status}.`;
+        const out = { total_capabilities: count || 0, message };
+        return { structuredContent: out, content: [{ type: "text", text: message }] };
+      }
       const state = await loadState();
       const id = profile_id || DEFAULT_PROFILE_ID;
       const p = profileFor(state, id);
-      const topicId = lesson_id.includes(":") ? lesson_id.split(":").slice(1).join(":") : lesson_id;
       p.recentTopicIds = [topicId, ...p.recentTopicIds.filter(x => x !== topicId)].slice(0, 14);
       if (["completed", "already_knew"].includes(status) && !p.completedTopicIds.includes(topicId)) p.completedTopicIds.push(topicId);
       if (status === "completed" && demonstrated_capability) {
@@ -272,6 +376,18 @@ function createPlusOneServer() {
       annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false }
     },
     async ({ profile_id, limit = 25 }) => {
+      const auth = await authenticatedContext(authHeader);
+      if (auth) {
+        const { data, error, count } = await auth.client.from("plus_one_capabilities")
+          .select("capability, completed_at, tags", { count: "exact" })
+          .eq("user_id", auth.user.id)
+          .order("completed_at", { ascending: false })
+          .limit(limit);
+        if (error) throw error;
+        const caps = (data || []).map(c => ({ capability:c.capability, completedAt:c.completed_at, tags:c.tags || [] }));
+        const out = { total_capabilities: count || 0, capabilities: caps };
+        return { structuredContent: out, content: [{ type: "text", text: `You have ${count || 0} recorded +1 capabilities.` }] };
+      }
       const state = await loadState();
       const id = profile_id || DEFAULT_PROFILE_ID;
       const p = profileFor(state, id);
@@ -295,6 +411,20 @@ function createPlusOneServer() {
       annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false }
     },
     async ({ profile_id }) => {
+      const auth = await authenticatedContext(authHeader);
+      if (auth) {
+        const p = await getRemoteProfile(auth);
+        const [{ data: lessons }, { data: caps }, { data: feedback }] = await Promise.all([
+          auth.client.from("plus_one_daily_lessons").select("*").eq("user_id", auth.user.id),
+          auth.client.from("plus_one_capabilities").select("*").eq("user_id", auth.user.id),
+          auth.client.from("plus_one_feedback").select("*").eq("user_id", auth.user.id)
+        ]);
+        const out = { profile_id: auth.user.id, profile: { ...p, capabilities: caps || [], feedback: feedback || [] }, lessons: lessons || [] };
+        return {
+          structuredContent: out,
+          content: [{ type: "text", text: "Here is the +1 learning data stored for your authenticated account. +1 does not store raw ChatGPT conversation transcripts." }]
+        };
+      }
       const state = await loadState();
       const id = profile_id || DEFAULT_PROFILE_ID;
       const p = profileFor(state, id);
@@ -323,6 +453,20 @@ function createPlusOneServer() {
     },
     async ({ profile_id, confirm }) => {
       if (confirm !== true) throw new Error("Deletion requires explicit confirmation.");
+      const auth = await authenticatedContext(authHeader);
+      if (auth) {
+        const uid = auth.user.id;
+        const tables = ["plus_one_feedback","plus_one_capabilities","plus_one_daily_lessons","plus_one_profiles"];
+        for (const table of tables) {
+          const { error } = await auth.client.from(table).delete().eq("user_id", uid);
+          if (error) throw error;
+        }
+        const out = { deleted: true, profile_id: uid };
+        return {
+          structuredContent: out,
+          content: [{ type: "text", text: "Your authenticated +1 learning data was deleted." }]
+        };
+      }
       const state = await loadState();
       const id = profile_id || DEFAULT_PROFILE_ID;
       const existed = Boolean(state.profiles[id] || state.lessons[id]);
@@ -357,14 +501,14 @@ const httpServer = createServer(async (req, res) => {
   }
   if (req.method === "GET" && (url.pathname === "/" || url.pathname === "/health")) {
     res.writeHead(200, { "content-type": "application/json" });
-    return res.end(JSON.stringify({ name: "+1 Daily MCP", status: "ok", version: "0.3.0", storage: pool ? "postgres" : "temporary-file" }));
+    return res.end(JSON.stringify({ name: "+1 Daily MCP", status: "ok", version: "0.3.0", storage: SUPABASE_URL ? "supabase-authenticated-with-fallback" : (pool ? "postgres" : "temporary-file") }));
   }
 
   const MCP_METHODS = new Set(["POST", "GET", "DELETE"]);
   if (url.pathname === MCP_PATH && req.method && MCP_METHODS.has(req.method)) {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Expose-Headers", "Mcp-Session-Id");
-    const server = createPlusOneServer();
+    const server = createPlusOneServer(req.headers.authorization || "");
     const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined, enableJsonResponse: true });
     res.on("close", () => { transport.close(); server.close(); });
     try {
