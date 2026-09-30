@@ -10,6 +10,7 @@ import { createClient } from "@supabase/supabase-js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const seedTopics = JSON.parse(readFileSync(resolve(__dirname, "data/seed-topics.json"), "utf8"));
+const WEB_INDEX = readFileSync(resolve(__dirname, "public/index.html"), "utf8");
 const DATA_FILE = process.env.PLUS_ONE_DATA_FILE || resolve(__dirname, "data/state.json");
 const DEFAULT_PROFILE_ID = process.env.DEFAULT_PROFILE_ID || "demo";
 const DATABASE_URL = process.env.DATABASE_URL || "";
@@ -176,6 +177,26 @@ function chooseTopic(profile, contextSummary = "", stableKey = "") {
 function makeLessonId(day, topicId) {
   return `${day}:${topicId}`;
 }
+async function readJsonBody(req) {
+  let body = "";
+  for await (const chunk of req) {
+    body += chunk;
+    if (body.length > 1000000) throw new Error("Request body too large");
+  }
+  return body ? JSON.parse(body) : {};
+}
+function sendJson(res, status, value) {
+  res.writeHead(status, { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" });
+  res.end(JSON.stringify(value));
+}
+async function requireAuth(req, res) {
+  const ctx = await authenticatedContext(req.headers.authorization || "");
+  if (!ctx) {
+    sendJson(res, 401, { error: "Sign in required." });
+    return null;
+  }
+  return ctx;
+}
 
 function createPlusOneServer(authHeader = "") {
   const server = new McpServer(
@@ -244,7 +265,11 @@ function createPlusOneServer(authHeader = "") {
         learning_outcome: z.string(),
         why_useful: z.string(),
         estimated_minutes: z.number(),
-        tags: z.array(z.string())
+        tags: z.array(z.string()),
+        teach: z.string(),
+        check_question: z.string(),
+        check_answer: z.string(),
+        achievement: z.string()
       },
       annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false }
     },
@@ -292,7 +317,11 @@ function createPlusOneServer(authHeader = "") {
         learning_outcome: topic.outcome,
         why_useful: topic.why,
         estimated_minutes: topic.minutes,
-        tags: topic.tags
+        tags: topic.tags,
+        teach: topic.teach || "",
+        check_question: topic.check_question || "",
+        check_answer: topic.check_answer || "",
+        achievement: topic.achievement || topic.outcome
       };
       return {
         structuredContent: out,
@@ -499,9 +528,135 @@ const httpServer = createServer(async (req, res) => {
     });
     return res.end();
   }
-  if (req.method === "GET" && (url.pathname === "/" || url.pathname === "/health")) {
-    res.writeHead(200, { "content-type": "application/json" });
-    return res.end(JSON.stringify({ name: "+1 Daily MCP", status: "ok", version: "0.3.0", storage: SUPABASE_URL ? "supabase-authenticated-with-fallback" : (pool ? "postgres" : "temporary-file") }));
+  if (req.method === "GET" && url.pathname === "/") {
+    res.writeHead(200, { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" });
+    return res.end(WEB_INDEX);
+  }
+  if (req.method === "GET" && url.pathname === "/health") {
+    return sendJson(res, 200, {
+      name: "+1 Daily",
+      status: "ok",
+      version: "0.5.0",
+      web: true,
+      storage: SUPABASE_URL ? "supabase-authenticated-with-fallback" : (pool ? "postgres" : "temporary-file")
+    });
+  }
+
+  if (url.pathname === "/api/profile" && req.method === "GET") {
+    const auth = await requireAuth(req, res); if (!auth) return;
+    const { data, error } = await auth.client.from("plus_one_profiles").select("*").eq("user_id", auth.user.id).maybeSingle();
+    if (error) return sendJson(res, 500, { error: error.message });
+    return sendJson(res, 200, { exists: Boolean(data), interests: data?.interests || [], goals: data?.goals || [], avoid_topics: data?.avoid_topics || [] });
+  }
+
+  if (url.pathname === "/api/profile" && req.method === "PUT") {
+    const auth = await requireAuth(req, res); if (!auth) return;
+    try {
+      const body = await readJsonBody(req);
+      const p = await getRemoteProfile(auth);
+      if (Array.isArray(body.interests)) p.interests = [...new Set(body.interests.map(x => String(x).trim()).filter(Boolean))].slice(0, 30);
+      if (Array.isArray(body.goals)) p.goals = [...new Set(body.goals.map(x => String(x).trim()).filter(Boolean))].slice(0, 20);
+      if (Array.isArray(body.avoid_topics)) p.avoidTopics = [...new Set(body.avoid_topics.map(x => String(x).trim()).filter(Boolean))].slice(0, 30);
+      await upsertRemoteProfile(auth, p);
+      return sendJson(res, 200, { ok: true, interests: p.interests, goals: p.goals, avoid_topics: p.avoidTopics });
+    } catch (error) { return sendJson(res, 400, { error: error.message }); }
+  }
+
+  if (url.pathname === "/api/today" && req.method === "GET") {
+    const auth = await requireAuth(req, res); if (!auth) return;
+    try {
+      const p = await getRemoteProfile(auth);
+      const requested = url.searchParams.get("date") || "";
+      const day = /^\\d{4}-\\d{2}-\\d{2}$/.test(requested) ? requested : new Date().toISOString().slice(0,10);
+      const { data, error } = await auth.client.from("plus_one_daily_lessons").select("topic_id").eq("user_id", auth.user.id).eq("local_date", day).maybeSingle();
+      if (error) throw error;
+      let topic = data?.topic_id ? seedTopics.find(t => t.id === data.topic_id) : null;
+      if (!topic) topic = chooseTopic(p, "", `${auth.user.id}:${day}`);
+      if (!data?.topic_id) {
+        const { error: upsertError } = await auth.client.from("plus_one_daily_lessons").upsert({ user_id: auth.user.id, local_date: day, topic_id: topic.id, selected_at: new Date().toISOString() });
+        if (upsertError) throw upsertError;
+      }
+      return sendJson(res, 200, {
+        lesson_id: makeLessonId(day, topic.id),
+        title: topic.title,
+        learning_outcome: topic.outcome,
+        why_useful: topic.why,
+        estimated_minutes: topic.minutes,
+        tags: topic.tags,
+        teach: topic.teach || "",
+        check_question: topic.check_question || "",
+        check_answer: topic.check_answer || "",
+        achievement: topic.achievement || topic.outcome
+      });
+    } catch (error) { return sendJson(res, 500, { error: error.message }); }
+  }
+
+  if (url.pathname === "/api/record" && req.method === "POST") {
+    const auth = await requireAuth(req, res); if (!auth) return;
+    try {
+      const body = await readJsonBody(req);
+      const lessonId = String(body.lesson_id || "");
+      if (!lessonId) return sendJson(res, 400, { error: "lesson_id is required" });
+      const status = ["completed","skipped","already_knew","not_interested"].includes(body.status) ? body.status : "completed";
+      const topicId = lessonId.includes(":") ? lessonId.split(":").slice(1).join(":") : lessonId;
+      const p = await getRemoteProfile(auth);
+      p.recentTopicIds = [topicId, ...p.recentTopicIds.filter(x => x !== topicId)].slice(0, 14);
+      if (["completed","already_knew"].includes(status) && !p.completedTopicIds.includes(topicId)) p.completedTopicIds.push(topicId);
+      await upsertRemoteProfile(auth, p);
+      if (status === "completed" && body.demonstrated_capability) {
+        const { error } = await auth.client.from("plus_one_capabilities").insert({
+          user_id: auth.user.id,
+          lesson_id: lessonId,
+          capability: String(body.demonstrated_capability).slice(0,500),
+          tags: Array.isArray(body.tags) ? body.tags.slice(0,20) : []
+        });
+        if (error) throw error;
+      }
+      const { error: feedbackError } = await auth.client.from("plus_one_feedback").insert({
+        user_id: auth.user.id,
+        lesson_id: lessonId,
+        status,
+        rating: ["loved","useful","neutral","not_for_me"].includes(body.rating) ? body.rating : null,
+        tags: Array.isArray(body.tags) ? body.tags.slice(0,20) : []
+      });
+      if (feedbackError) throw feedbackError;
+      return sendJson(res, 200, { ok: true });
+    } catch (error) { return sendJson(res, 400, { error: error.message }); }
+  }
+
+  if (url.pathname === "/api/passport" && req.method === "GET") {
+    const auth = await requireAuth(req, res); if (!auth) return;
+    const { data, error, count } = await auth.client.from("plus_one_capabilities")
+      .select("capability, completed_at, tags", { count: "exact" })
+      .eq("user_id", auth.user.id)
+      .order("completed_at", { ascending: false })
+      .limit(50);
+    if (error) return sendJson(res, 500, { error: error.message });
+    return sendJson(res, 200, { total_capabilities: count || 0, capabilities: (data || []).map(c => ({ capability: c.capability, completedAt: c.completed_at, tags: c.tags || [] })) });
+  }
+
+  if (url.pathname === "/api/export" && req.method === "GET") {
+    const auth = await requireAuth(req, res); if (!auth) return;
+    try {
+      const p = await getRemoteProfile(auth);
+      const [{ data: lessons }, { data: caps }, { data: feedback }] = await Promise.all([
+        auth.client.from("plus_one_daily_lessons").select("*").eq("user_id", auth.user.id),
+        auth.client.from("plus_one_capabilities").select("*").eq("user_id", auth.user.id),
+        auth.client.from("plus_one_feedback").select("*").eq("user_id", auth.user.id)
+      ]);
+      return sendJson(res, 200, { profile: p, lessons: lessons || [], capabilities: caps || [], feedback: feedback || [] });
+    } catch (error) { return sendJson(res, 500, { error: error.message }); }
+  }
+
+  if (url.pathname === "/api/data" && req.method === "DELETE") {
+    const auth = await requireAuth(req, res); if (!auth) return;
+    try {
+      for (const table of ["plus_one_feedback","plus_one_capabilities","plus_one_daily_lessons","plus_one_profiles"]) {
+        const { error } = await auth.client.from(table).delete().eq("user_id", auth.user.id);
+        if (error) throw error;
+      }
+      return sendJson(res, 200, { deleted: true });
+    } catch (error) { return sendJson(res, 500, { error: error.message }); }
   }
 
   const MCP_METHODS = new Set(["POST", "GET", "DELETE"]);
