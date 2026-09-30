@@ -1,32 +1,43 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "plus-one-daily",
-  "version": "0.5.0",
-  "description": "One useful personalised thing to learn every day inside ChatGPT.",
+  "version": "0.6.0",
+  "description": "Learn your way. One useful, personalised lesson every day in just a few minutes.",
+  "author": {
+    "name": "+1"
+  },
+  "homepage": "https://plus-one-daily-mcp.onrender.com",
+  "repository": "https://github.com/pcmxgamin/plus-one-plugin",
   "keywords": [
     "learning",
     "daily",
-    "personalisation",
+    "personalised",
+    "microlearning",
     "skills",
-    "microlearning"
+    "understanding"
   ],
   "extensions": {
     "com.openai": {
       "interface": {
-        "displayName": "+1 Daily",
-        "shortDescription": "One useful thing, personalised for you, every day.",
-        "longDescription": "+1 chooses one genuinely useful thing worth learning next, teaches it in a short interactive ChatGPT lesson, and records what you can now do, understand, or recognise.",
+        "displayName": "+1",
+        "shortDescription": "Learn your way — one useful lesson, every day.",
+        "longDescription": "Quick, personalised learning inside ChatGPT. +1 uses relevant context available to ChatGPT to choose something worth learning next, teaches it in a focused 3–5 minute experience, and builds a Capability Passport of what you can now do, understand, recognise, or explain.",
         "developerName": "+1",
         "category": "Education",
         "capabilities": [
           "Read",
           "Write"
         ],
+        "websiteURL": "https://plus-one-daily-mcp.onrender.com",
         "defaultPrompt": [
           "Give me today's +1.",
-          "Teach me one useful thing in five minutes.",
-          "Show me what I've learned with +1."
-        ]
+          "Enable my daily +1 each morning.",
+          "Show me my +1 Capability Passport.",
+          "Make today's +1 relevant to what I've been working on."
+        ],
+        "brandColor": "#CCFF2E",
+        "composerIcon": "./assets/plus-one-icon.png",
+        "logo": "./assets/plus-one-icon.png"
       }
     }
   }
