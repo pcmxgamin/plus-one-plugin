@@ -200,7 +200,7 @@ async function requireAuth(req, res) {
 
 function createPlusOneServer(authHeader = "") {
   const server = new McpServer(
-    { name: "plus-one-daily", version: "0.2.0" },
+    { name: "plus-one-daily", version: "0.5.0" },
     { instructions: "Choose one useful lesson at a time. Keep raw private conversation text out of plugin storage; use only concise user-approved learning-profile summaries." }
   );
 
@@ -361,7 +361,7 @@ function createPlusOneServer(authHeader = "") {
           const { error } = await auth.client.from("plus_one_capabilities").insert({
             user_id: auth.user.id, lesson_id, capability: demonstrated_capability, tags
           });
-          if (error) throw error;
+          if (error && error.code !== "23505") throw error;
         }
         const { error: feedbackError } = await auth.client.from("plus_one_feedback").insert({
           user_id: auth.user.id, lesson_id, status, rating: rating || null, tags
@@ -610,7 +610,7 @@ const httpServer = createServer(async (req, res) => {
           capability: String(body.demonstrated_capability).slice(0,500),
           tags: Array.isArray(body.tags) ? body.tags.slice(0,20) : []
         });
-        if (error) throw error;
+        if (error && error.code !== "23505") throw error;
       }
       const { error: feedbackError } = await auth.client.from("plus_one_feedback").insert({
         user_id: auth.user.id,
