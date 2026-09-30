@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: plus-one-daily-mcp
+    runtime: node
+    plan: free
+    buildCommand: npm install --omit=dev
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: PLUS_ONE_DATA_FILE
+        value: /tmp/plus-one-state.json
+      - key: DEFAULT_PROFILE_ID
+        value: private-beta
