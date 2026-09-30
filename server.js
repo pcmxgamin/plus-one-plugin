@@ -5,18 +5,62 @@ import { fileURLToPath } from "node:url";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { z } from "zod";
+import pg from "pg";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const seedTopics = JSON.parse(readFileSync(resolve(__dirname, "data/seed-topics.json"), "utf8"));
 const DATA_FILE = process.env.PLUS_ONE_DATA_FILE || resolve(__dirname, "data/state.json");
 const DEFAULT_PROFILE_ID = process.env.DEFAULT_PROFILE_ID || "demo";
+const DATABASE_URL = process.env.DATABASE_URL || "";
+const { Pool } = pg;
+const pool = DATABASE_URL ? new Pool({
+  connectionString: DATABASE_URL,
+  ssl: process.env.PGSSLMODE === "disable" ? false : { rejectUnauthorized: false }
+}) : null;
+let dbReady = null;
 
-function loadState() {
+async function ensureDatabase() {
+  if (!pool) return;
+  if (!dbReady) {
+    dbReady = (async () => {
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS plus_one_state (
+          id TEXT PRIMARY KEY,
+          state JSONB NOT NULL,
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+      `);
+      const seed = existsSync(DATA_FILE)
+        ? (() => { try { return JSON.parse(readFileSync(DATA_FILE, "utf8")); } catch { return { profiles: {}, lessons: {} }; } })()
+        : { profiles: {}, lessons: {} };
+      await pool.query(
+        "INSERT INTO plus_one_state (id, state) VALUES ($1, $2::jsonb) ON CONFLICT (id) DO NOTHING",
+        ["global", JSON.stringify(seed)]
+      );
+    })();
+  }
+  return dbReady;
+}
+
+async function loadState() {
+  if (pool) {
+    await ensureDatabase();
+    const result = await pool.query("SELECT state FROM plus_one_state WHERE id = $1", ["global"]);
+    return result.rows[0]?.state || { profiles: {}, lessons: {} };
+  }
   if (!existsSync(DATA_FILE)) return { profiles: {}, lessons: {} };
   try { return JSON.parse(readFileSync(DATA_FILE, "utf8")); }
   catch { return { profiles: {}, lessons: {} }; }
 }
-function saveState(state) {
+async function saveState(state) {
+  if (pool) {
+    await ensureDatabase();
+    await pool.query(
+      "INSERT INTO plus_one_state (id, state, updated_at) VALUES ($1, $2::jsonb, NOW()) ON CONFLICT (id) DO UPDATE SET state = EXCLUDED.state, updated_at = NOW()",
+      ["global", JSON.stringify(state)]
+    );
+    return;
+  }
   mkdirSync(dirname(DATA_FILE), { recursive: true });
   writeFileSync(DATA_FILE, JSON.stringify(state, null, 2));
 }
@@ -106,14 +150,14 @@ function createPlusOneServer() {
       annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false }
     },
     async ({ profile_id, interests, goals, avoid_topics }) => {
-      const state = loadState();
+      const state = await loadState();
       const id = profile_id || DEFAULT_PROFILE_ID;
       const p = profileFor(state, id);
       if (interests) p.interests = [...new Set(interests.map(x => x.trim()).filter(Boolean))];
       if (goals) p.goals = [...new Set(goals.map(x => x.trim()).filter(Boolean))];
       if (avoid_topics) p.avoidTopics = [...new Set(avoid_topics.map(x => x.trim()).filter(Boolean))];
       p.updatedAt = new Date().toISOString();
-      saveState(state);
+      await saveState(state);
       const out = { profile_id: id, interests: p.interests, goals: p.goals, avoid_topics: p.avoidTopics };
       return { structuredContent: out, content: [{ type: "text", text: "Updated the +1 learning profile." }] };
     }
@@ -142,7 +186,7 @@ function createPlusOneServer() {
       annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false }
     },
     async ({ profile_id, context_summary = "", preferred_minutes, local_date }) => {
-      const state = loadState();
+      const state = await loadState();
       const id = profile_id || DEFAULT_PROFILE_ID;
       const p = profileFor(state, id);
       const day = local_date || new Date().toISOString().slice(0,10);
@@ -159,7 +203,7 @@ function createPlusOneServer() {
         }
       }
       state.lessons[id][day] = { topicId: topic.id, selectedAt: new Date().toISOString() };
-      saveState(state);
+      await saveState(state);
       const out = {
         lesson_id: makeLessonId(day, topic.id),
         title: topic.title,
@@ -196,7 +240,7 @@ function createPlusOneServer() {
       annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false }
     },
     async ({ profile_id, lesson_id, status, demonstrated_capability, rating, tags = [] }) => {
-      const state = loadState();
+      const state = await loadState();
       const id = profile_id || DEFAULT_PROFILE_ID;
       const p = profileFor(state, id);
       const topicId = lesson_id.includes(":") ? lesson_id.split(":").slice(1).join(":") : lesson_id;
@@ -208,7 +252,7 @@ function createPlusOneServer() {
       p.feedback.push({ lessonId: lesson_id, status, rating: rating || null, at: new Date().toISOString(), tags });
       p.feedback = p.feedback.slice(-200);
       p.updatedAt = new Date().toISOString();
-      saveState(state);
+      await saveState(state);
       const message = status === "completed" ? `Capability recorded: ${demonstrated_capability || "lesson completed"}` : `Recorded lesson as ${status}.`;
       const out = { total_capabilities: p.capabilities.length, message };
       return { structuredContent: out, content: [{ type: "text", text: message }] };
@@ -228,12 +272,68 @@ function createPlusOneServer() {
       annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false }
     },
     async ({ profile_id, limit = 25 }) => {
-      const state = loadState();
+      const state = await loadState();
       const id = profile_id || DEFAULT_PROFILE_ID;
       const p = profileFor(state, id);
       const caps = [...p.capabilities].reverse().slice(0, limit).map(c => ({ capability:c.capability, completedAt:c.completedAt, tags:c.tags || [] }));
       const out = { total_capabilities: p.capabilities.length, capabilities: caps };
       return { structuredContent: out, content: [{ type: "text", text: `You have ${p.capabilities.length} recorded +1 capabilities.` }] };
+    }
+  );
+
+  server.registerTool(
+    "export_learning_data",
+    {
+      title: "Export my +1 data",
+      description: "Return the learning profile, lesson selections, feedback and capability history stored for one +1 profile.",
+      inputSchema: { profile_id: z.string().min(1).optional() },
+      outputSchema: {
+        profile_id: z.string(),
+        profile: z.any(),
+        lessons: z.any()
+      },
+      annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false }
+    },
+    async ({ profile_id }) => {
+      const state = await loadState();
+      const id = profile_id || DEFAULT_PROFILE_ID;
+      const p = profileFor(state, id);
+      const out = { profile_id: id, profile: p, lessons: state.lessons[id] || {} };
+      return {
+        structuredContent: out,
+        content: [{ type: "text", text: "Here is the +1 learning data stored for this profile. +1 does not store raw ChatGPT conversation transcripts." }]
+      };
+    }
+  );
+
+  server.registerTool(
+    "delete_learning_data",
+    {
+      title: "Delete my +1 data",
+      description: "Permanently delete the stored +1 learning profile, lesson history, feedback and Capability Passport for one profile.",
+      inputSchema: {
+        profile_id: z.string().min(1).optional(),
+        confirm: z.literal(true)
+      },
+      outputSchema: {
+        deleted: z.boolean(),
+        profile_id: z.string()
+      },
+      annotations: { readOnlyHint: false, destructiveHint: true, openWorldHint: false }
+    },
+    async ({ profile_id, confirm }) => {
+      if (confirm !== true) throw new Error("Deletion requires explicit confirmation.");
+      const state = await loadState();
+      const id = profile_id || DEFAULT_PROFILE_ID;
+      const existed = Boolean(state.profiles[id] || state.lessons[id]);
+      delete state.profiles[id];
+      delete state.lessons[id];
+      await saveState(state);
+      const out = { deleted: existed, profile_id: id };
+      return {
+        structuredContent: out,
+        content: [{ type: "text", text: existed ? "Your +1 learning data was deleted." : "No stored +1 learning data was found for that profile." }]
+      };
     }
   );
 
@@ -257,7 +357,7 @@ const httpServer = createServer(async (req, res) => {
   }
   if (req.method === "GET" && (url.pathname === "/" || url.pathname === "/health")) {
     res.writeHead(200, { "content-type": "application/json" });
-    return res.end(JSON.stringify({ name: "+1 Daily MCP", status: "ok", version: "0.2.0" }));
+    return res.end(JSON.stringify({ name: "+1 Daily MCP", status: "ok", version: "0.3.0", storage: pool ? "postgres" : "temporary-file" }));
   }
 
   const MCP_METHODS = new Set(["POST", "GET", "DELETE"]);
