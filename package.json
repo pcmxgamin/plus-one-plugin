@@ -1,6 +1,6 @@
 {
   "name": "plus-one-chatgpt-plugin",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "private": true,
   "type": "module",
   "description": "MCP server for +1 — one useful personalised thing to learn every day inside ChatGPT.",
